@@ -1,0 +1,152 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+apply from: 'constants.gradle'
+
+buildscript {
+  repositories {
+    jcenter()
+  }
+
+  dependencies {
+    classpath 'com.android.tools.build:gradle:2.3.0'
+
+    classpath 'com.stanfy.spoon:spoon-gradle-plugin:1.2.2'
+  }
+}
+
+println "Using Android Native Player version: $anpVersion"
+
+project.ext {
+  // The directory that will be used to reference dependent libraries.
+  // Modify as needed. Defaulted to users home directory.
+  libraryDirectory = "${System.getProperty("user.home")}/libs/"
+}
+
+configure(subprojects.findAll {it.name.endsWith('SampleApp')}) {
+  apply plugin: 'com.android.application'
+
+  repositories {
+    mavenLocal()
+    jcenter()
+
+    maven {
+      url 'https://maven.google.com'
+    }
+    maven {
+      url 'http://repo.brightcove.com/releases'
+    }
+    maven {
+      url System.getenv('ANDROID_HOME') + '/extras/android/m2repository'
+    }
+    maven {
+      url System.getenv('ANDROID_HOME') + '/extras/google/m2repository'
+    }
+
+    // This top level file repository will provide/contain third party
+    // dependencies which are either downloaded directly (not using a
+    // Maven repo) or installed manually for something like VisualOn.
+    flatDir {
+      dirs libraryDirectory
+    }
+  }
+
+  android {
+    compileSdkVersion ANDROID_COMPILE_SDK_VERSION
+    buildToolsVersion ANDROID_BUILD_TOOLS_VERSION
+
+    defaultConfig {
+      minSdkVersion ANDROID_MIN_SDK_VERSION
+      targetSdkVersion ANDROID_TARGET_SDK_VERSION
+    }
+
+    signingConfigs {
+      release {
+          storeFile file("${rootDir}/release.keystore")
+          storePassword "my_keystore_password"
+          keyAlias "my_key"
+          keyPassword "my_password"
+      }
+    }
+
+    buildTypes {
+      release {
+        signingConfig signingConfigs.release
+        minifyEnabled true
+        proguardFiles getDefaultProguardFile('proguard-android.txt'), "${rootDir}/proguard-project.txt"
+      }
+    }
+
+    lintOptions {
+      warning 'InvalidPackage'
+    }
+
+    gradle.projectsEvaluated {
+      tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+      }
+    }
+  }
+
+  dependencies {
+    compile "com.brightcove.player:android-sdk:${anpVersion}"
+  }
+
+  if (project.name.contains('IMA')) {
+    dependencies {
+      compile "com.brightcove.player:android-ima-plugin:${anpVersion}"
+      compile 'com.google.ads.interactivemedia.v3:interactivemedia:'+GOOGLE_IMA_SDK_VERSION
+      compile 'com.google.android.gms:play-services-ads:'+PLAY_SERVICES_VERSION
+      compile 'com.android.support:support-v4:'+SUPPORT_V4_VERSION
+    }
+  }
+
+  if (project.name.contains('Omniture')) {
+    dependencies {
+      compile "com.brightcove.player:android-omniture-plugin:${anpVersion}"
+      compile files(libraryDirectory + "adobeMobileLibrary.jar")
+    }
+  }
+
+  if (project.name.contains('OnceUx')) {
+    dependencies {
+      compile "com.brightcove.player:android-onceux-plugin:${anpVersion}"
+      compile "com.brightcove.player:exoplayer2:${anpVersion}"
+    }
+  }
+
+  if (project.parent.name.equals('brightcove-exoplayer') ||
+          project.parent.name.equals('brightcove-player-controls')) {
+    dependencies {
+      compile "com.brightcove.player:exoplayer2:${anpVersion}"
+    }
+
+    android {
+      defaultConfig {
+        minSdkVersion 18
+      }
+    }
+  }
+
+  if (project.name.contains('WebVTT')) {
+    android {
+      defaultConfig {
+        minSdkVersion 19
+      }
+    }
+  }
+
+  if (project.name.contains('Cast')) {
+    dependencies {
+      compile "com.brightcove.player:android-cast-plugin:${anpVersion}"
+    }
+  }
+
+  if (project.name.contains('FreeWheel')) {
+    dependencies {
+      compile "com.brightcove.player:android-freewheel-plugin:${anpVersion}"
+      compile files(libraryDirectory + "AdManager.jar")
+    }
+  }
+
+  println "Processing ${project.name}"
+}
