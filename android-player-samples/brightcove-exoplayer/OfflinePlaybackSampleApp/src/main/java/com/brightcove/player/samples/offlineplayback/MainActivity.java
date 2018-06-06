@@ -47,12 +47,12 @@ public class MainActivity extends BrightcovePlayer {
     /**
      * The video cloud account identifier.
      */
-    private static final String ACCOUNT_ID = "5578954898001";
+    private static final String ACCOUNT_ID = "<BC ACCOUNT ID>";
 
     /**
      * The policy key for the video cloud account.
      */
-    private static final String POLICY_KEY = "BCpkADawqM3xN3iyVQOTsbnLH2R7bhacQph_6h0wSxSJqYgqt7WYVwGDh82WEq8xZpCCiBGeGENy7hru0k6nz9rcapG6o1R4xa5ranMnvq-VXhtfImCCWhP_OSWWkChBoCGhyzGzjP4uE9Cy";
+    private static final String POLICY_KEY = "<BC POLICY KEY>";
 
     /**
      * Specifies how long the content can be consumed after the start of playback as total number
